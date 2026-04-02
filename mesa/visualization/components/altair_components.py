@@ -156,14 +156,18 @@ def _draw_grid(space, agent_portrayal, property_layer_portrayal):
                 f"visualizing {type(space)} is currently not supported through altair"
             )
 
+    # FIX START (empty agent case handle)
+    if not all_agent_data:
+        # Return empty chart instead of crashing
+        return alt.Chart(pd.DataFrame()).mark_point().properties(width=300, height=300)
+    # FIX END
+
     invalid_tooltips = ["color", "size", "x", "y"]
 
     x_y_type = "ordinal" if not isinstance(space, ContinuousSpace) else "nominal"
 
     encoding_dict = {
-        # no x-axis label
         "x": alt.X("x", axis=None, type=x_y_type),
-        # no y-axis label
         "y": alt.Y("y", axis=None, type=x_y_type),
         "tooltip": [
             alt.Tooltip(

@@ -155,15 +155,15 @@ def _draw_grid(space, agent_portrayal, property_layer_portrayal):
             raise NotImplementedError(
                 f"visualizing {type(space)} is currently not supported through altair"
             )
-    if not all_agent_data:
-        return alt.Chart(pd.DataFrame({"x": [], "y": []})).mark_point().properties(width=300, height=300)
+    # Handle empty agent data WITHOUT breaking flow
+    has_agents = bool(all_agent_data)
         
     invalid_tooltips = ["color", "size", "x", "y"]
 
     x_y_type = "ordinal" if not isinstance(space, ContinuousSpace) else "nominal"
 
     tooltip = []
-    if all_agent_data:
+    if has_agents:
         tooltip = [
             alt.Tooltip(
                 key,
@@ -178,17 +178,17 @@ def _draw_grid(space, agent_portrayal, property_layer_portrayal):
         "tooltip": tooltip,
     }
     has_color = False
-    if all_agent_data:
+    if has_agents:
         has_color = "color" in all_agent_data[0]
     has_size = False
-    if all_agent_data:
+    if has_agents:
         has_size = "size" in all_agent_data[0]
     if has_size:
         encoding_dict["size"] = alt.Size("size", type="quantitative")
 
     agent_chart = (
         alt.Chart(
-            alt.Data(values=all_agent_data), encoding=alt.Encoding(**encoding_dict)
+            alt.Data(values=all_agent_data if has_agents else [])
         )
         .mark_point(filled=True)
         .properties(width=300, height=300)

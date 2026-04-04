@@ -177,7 +177,7 @@ def _draw_grid(space, agent_portrayal, property_layer_portrayal):
         "y": alt.Y("y", axis=None, type=x_y_type),
         "tooltip": tooltip,
     }
-    
+
     has_color = False
     has_size = False
 
@@ -199,14 +199,14 @@ def _draw_grid(space, agent_portrayal, property_layer_portrayal):
     agent_chart = (
         alt.Chart(
             alt.Data(values=all_agent_data if has_agents else []),
-            encoding=alt.Encoding(**encoding_dict)
+            encoding=alt.Encoding(**encoding_dict),
         )
         .mark_point(filled=True)
         .properties(width=300, height=300)
     )
 
     cbar_chart = None
-    
+
     # This is the default value for the marker size, which auto-scales according to the grid area.
     if not has_size:
         length = min(space.width, space.height)

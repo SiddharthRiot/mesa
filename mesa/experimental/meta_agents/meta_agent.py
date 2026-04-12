@@ -143,6 +143,7 @@ def create_meta_agent(
     meta_methods: dict[str, Callable] | None = None,
     assume_constituting_agent_methods: bool = False,
     assume_constituting_agent_attributes: bool = False,
+    join_strategy: Callable[[list], Any] | None = None
 ) -> Any | None:
     """Create a new meta-agent class and instantiate agents.
 
@@ -156,6 +157,8 @@ def create_meta_agent(
     constituting_-agents as meta_agent methods.
     assume_constituting_agent_attributes (bool): Whether to retain attributes
     from constituting_-agents.
+    join_strategy (Callable[[list], Any] | None): A function to select which
+    meta-agent to join when multiple exist. Defaults to lowest unique_id.
 
     Returns:
         - MetaAgent Instance
@@ -250,13 +253,14 @@ def create_meta_agent(
                     existing_meta_agents.append(ma)
 
     if len(existing_meta_agents) > 0:
-        # TODO: Add way for user to specify how agents join meta-agent
-        # instead of random choice if there are multiple meta-agents of the same class
-        meta_agent = (
-            sorted(existing_meta_agents, key=lambda x: x.unique_id)[0]
-            if len(existing_meta_agents) > 1
-            else existing_meta_agents[0]
-        )
+        if len(existing_meta_agents) > 1:
+            if join_strategy is not None:
+                meta_agent = join_strategy(existing_meta_agents)
+            else:
+                meta_agent = sorted(existing_meta_agents, key=lambda x: x.unique_id)[0]
+        else:
+            meta_agent = existing_meta_agents[0]
+
         add_attributes(meta_agent, agents, meta_attributes)
         add_methods(meta_agent, agents, meta_methods)
         meta_agent.add_constituting_agents(agents)
